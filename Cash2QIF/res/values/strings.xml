@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cash2QIF</string>
+    <string name="empty">No entries.  Press Menu.</string>
+    <string name="menu_insert">Add entry</string>
+    <string name="edit">Edit</string>
+    <string name="menu_delete">Delete entry</string>
+    <string name="menu_delete_all">Delete all</string>
+    <string name="date">Date</string>
+    <string name="payee">Payee</string>
+    <string name="amount">Amount</string>
+    <string name="category">Category</string>
+    <string name="memo">Memo</string>
+    <string name="confirm">Confirm</string>
+    <string name="exportText"></string>
+    <string name="menu_export">Export</string>
+</resources>

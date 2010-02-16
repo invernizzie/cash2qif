@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" 
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+	<ScrollView android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<LinearLayout android:orientation="vertical"
+			android:layout_width="fill_parent"
+			android:layout_height="wrap_content"
+			android:scrollbars="vertical">
+	
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
+				android:text="@string/date" />
+			<Button android:id="@+id/datepickerbutton"
+			    android:layout_width="fill_parent" 
+			    android:layout_height="wrap_content" 
+			    android:text="@string/date"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
+				android:text="@string/payee" />
+			<EditText android:id="@+id/payee" 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
+				android:text="@string/amount" />
+			<EditText android:id="@+id/amount" 
+				android:digits="1234567890.-"
+				android:gravity="right"
+				android:inputType="numberDecimal"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
+				android:text="@string/category" />
+			<EditText android:id="@+id/category" 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
+				android:text="@string/memo" />
+			<EditText android:id="@+id/memo" 
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
+			<Button android:id="@+id/confirm" 
+			 	android:text="@string/confirm"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content" />
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>
