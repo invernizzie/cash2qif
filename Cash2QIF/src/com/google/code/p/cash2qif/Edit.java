@@ -169,15 +169,22 @@ public class Edit extends Activity {
         	memo = mMemoText.getText().toString();
 
         if (mRowId == null) {
-        	if (date != null && payee != null && amount != null && 
-        			category != null && memo != null) {
+        	if (validate(date, payee, amount, category, memo)) {
         		long id = mDbHelper.create(date, payee, amount, category, memo);
         		if (id > 0) {
         			mRowId = id;
         		}
         	}
         } else {
-            mDbHelper.update(mRowId, date, payee, amount, category, memo);
+        	if (validate(date, payee, amount, category, memo))
+        		mDbHelper.update(mRowId, date, payee, amount, category, memo);
         }
+    }
+    private boolean validate(String date, String payee, String amount, String category, String memo) {
+    	return notNull(date) && (notNull(payee) || notNull(amount) || notNull(category)|| notNull(memo));	
+    }
+
+	public boolean notNull(String s) {
+    	return s != null && s.length() > 0;
     }
 }
