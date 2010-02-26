@@ -13,7 +13,9 @@
  */
 package com.cash2qif.www;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -21,6 +23,8 @@ import android.app.Dialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -46,11 +50,15 @@ public class Edit extends Activity {
 		Button datePickerButton = (Button)findViewById(R.id.datepickerbutton);
 		datePickerButton.setOnClickListener(datePickerButtonOnClickListener);
         
-        mDatePickerText = (Button) findViewById(R.id.datepickerbutton);
-        mPayeeText = (EditText) findViewById(R.id.payee);
+	    autoCompleteField(R.id.autocomplete_payee, R.layout.payees, DbAdapter.KEY_PAYEE);
+	    autoCompleteField(R.id.autocomplete_category, R.layout.categories, DbAdapter.KEY_CATEGORY);
+	    autoCompleteField(R.id.autocomplete_memo, R.layout.memos, DbAdapter.KEY_MEMO);
+
+	    mDatePickerText = (Button) findViewById(R.id.datepickerbutton);
+        mPayeeText = (EditText) findViewById(R.id.autocomplete_payee);
         mAmountText = (EditText) findViewById(R.id.amount);
-        mCategoryText = (EditText) findViewById(R.id.category);
-        mMemoText = (EditText) findViewById(R.id.memo);
+        mCategoryText = (EditText) findViewById(R.id.autocomplete_category);
+        mMemoText = (EditText) findViewById(R.id.autocomplete_memo);
         
         Button confirmButton = (Button) findViewById(R.id.confirm);
         mRowId = savedInstanceState != null ? savedInstanceState.getLong(DbAdapter.KEY_ROWID) 
@@ -68,6 +76,23 @@ public class Edit extends Activity {
             }
         });
     }
+
+	private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField) {
+		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(autoCompleteViewId);
+	    Cursor cursor = mDbHelper.fetch(dbField);
+	    if (cursor != null) {
+	    	startManagingCursor(cursor);
+	    	List<String> field = new ArrayList<String>();
+	    	boolean last = false;
+	    	while (!last && cursor.getCount() > 0) {
+	    		field.add(cursor.getString(cursor.getColumnIndexOrThrow(dbField)));
+	    		last = cursor.isLast();
+	    		cursor.moveToNext();
+	    	}
+    		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, editViewId, field);
+    		textView.setAdapter(adapter);
+	    }
+	}
 
     private void populate() {
         if (mRowId != null) {

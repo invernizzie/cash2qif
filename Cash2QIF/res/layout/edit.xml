@@ -20,7 +20,8 @@
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" 
 				android:text="@string/payee" />
-			<EditText android:id="@+id/payee" 
+			<AutoCompleteTextView android:id="@+id/autocomplete_payee" 
+			    android:completionThreshold="1"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"/>
 			<TextView android:layout_width="wrap_content"
@@ -35,13 +36,15 @@
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" 
 				android:text="@string/category" />
-			<EditText android:id="@+id/category" 
+			<AutoCompleteTextView android:id="@+id/autocomplete_category" 
+			    android:completionThreshold="1"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"/>
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" 
 				android:text="@string/memo" />
-			<EditText android:id="@+id/memo" 
+			<AutoCompleteTextView android:id="@+id/autocomplete_memo" 
+			    android:completionThreshold="1"
 				android:layout_width="fill_parent"
 				android:layout_height="wrap_content"/>
 			<Button android:id="@+id/confirm" 

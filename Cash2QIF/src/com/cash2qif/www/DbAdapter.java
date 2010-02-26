@@ -107,6 +107,13 @@ public class DbAdapter {
             mCursor.moveToFirst();
         return mCursor;
     }
+    
+    public Cursor fetch(String column) throws SQLException {
+        Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] {column}, null, null, null, null, null, null);
+        if (mCursor != null)
+            mCursor.moveToFirst();
+        return mCursor;
+    }
 
     public boolean update(long rowId, String date, String payee, String amount, String category, String memo) {
         ContentValues args = new ContentValues();

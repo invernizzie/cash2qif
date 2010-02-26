@@ -67,7 +67,7 @@ public class Main extends ListActivity {
     	Cursor cursor = mDbHelper.fetchAll();
         startManagingCursor(cursor);
         String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT, DbAdapter.KEY_CATEGORY, DbAdapter.KEY_MEMO};
-        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount, R.id.category, R.id.memo};
+        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount};
         SimpleCursorAdapter list = 
         	    new SimpleCursorAdapter(this, R.layout.row, cursor, from, to);
         setListAdapter(list);
