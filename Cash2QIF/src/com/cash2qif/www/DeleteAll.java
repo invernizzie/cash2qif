@@ -8,13 +8,11 @@ import android.os.Bundle;
 
 public class DeleteAll extends Activity {
     public static final int DIALOG_DELETE_CONFIRMATION_ID = 0;
-    private DbAdapter mDbHelper;
+    private DbAdapter mDbHelper = new DbAdapter(this);
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     	showDialog(DIALOG_DELETE_CONFIRMATION_ID);
-        mDbHelper = new DbAdapter(this);
-        mDbHelper.open();
     }
     
     protected Dialog onCreateDialog(int id) {
@@ -42,6 +40,9 @@ public class DeleteAll extends Activity {
     }
     
     public boolean deleteAll() {
-    	return mDbHelper.deleteAll();
+        mDbHelper.open();
+    	boolean result = mDbHelper.deleteAll();
+        mDbHelper.close();
+        return result;
     }
 }

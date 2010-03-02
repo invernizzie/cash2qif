@@ -13,5 +13,6 @@
     <string name="memo">Memo</string>
     <string name="confirm">Confirm</string>
     <string name="exportText"></string>
+	<string name="today">Today</string>
     <string name="menu_export">Export</string>
 </resources>

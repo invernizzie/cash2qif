@@ -35,7 +35,7 @@ public class DbAdapter {
     
     private static final String DATABASE_CREATE =
             "create table entry (_id integer primary key autoincrement, " +
-            "date text not null, payee text not null, amount not null," +
+            "date integer not null, payee text not null, amount double not null," +
             "category, memo);";
 
     private static final String DATABASE_NAME = "data";
@@ -74,17 +74,12 @@ public class DbAdapter {
     }
     
     public void close() {
-        mDbHelper.close();
+    	if (mDbHelper != null)
+    		mDbHelper.close();
     }
 
-    public long create(String date, String payee, String amount, String category, String memo) {
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_DATE, date);
-        initialValues.put(KEY_PAYEE, payee);
-        initialValues.put(KEY_AMOUNT, amount);
-        initialValues.put(KEY_CATEGORY, category);
-        initialValues.put(KEY_MEMO, memo);
-        return mDb.insert(DATABASE_TABLE, null, initialValues);
+    public long create(ContentValues args) {
+        return mDb.insert(DATABASE_TABLE, null, args);
     }
 
     public boolean delete(long rowId) {
@@ -97,7 +92,7 @@ public class DbAdapter {
 
     public Cursor fetchAll() {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
-                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, null);
+                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE);
     }
 
     public Cursor fetch(long rowId) throws SQLException {
@@ -115,13 +110,7 @@ public class DbAdapter {
         return mCursor;
     }
 
-    public boolean update(long rowId, String date, String payee, String amount, String category, String memo) {
-        ContentValues args = new ContentValues();
-        args.put(KEY_DATE, date);
-        args.put(KEY_PAYEE, payee);
-        args.put(KEY_AMOUNT, amount);
-        args.put(KEY_CATEGORY, category);
-        args.put(KEY_MEMO, memo);
+    public boolean update(long rowId, ContentValues args) {
         return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
 }

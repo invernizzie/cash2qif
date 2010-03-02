@@ -17,7 +17,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 import android.app.ListActivity;
 import android.content.Intent;
@@ -31,6 +34,7 @@ import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
@@ -50,30 +54,42 @@ public class Main extends ListActivity {
     private static final String QIF_CATEGORY = "L";
     private static final String QIF_MEMO = "M";
     private static final String QIF_DIVIDER = "^";
-
-    private DbAdapter mDbHelper;
+	private int COL_DATE;
+	private int COL_PAYEE;
+	private int COL_AMOUNT;
+	private int COL_CATEGORY;
+	private int COL_MEMO;
+	private DecimalFormat amountFormatter = new DecimalFormat("#,##0.00");
+	public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy");
+    private DbAdapter mDbHelper = new DbAdapter(this);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
-        mDbHelper = new DbAdapter(this);
-        mDbHelper.open();
         fillData();
         registerForContextMenu(getListView());
     }
 
 	private void fillData() {
+        mDbHelper.open();
     	Cursor cursor = mDbHelper.fetchAll();
         startManagingCursor(cursor);
-        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT, DbAdapter.KEY_CATEGORY, DbAdapter.KEY_MEMO};
+        COL_DATE = cursor.getColumnIndex(DbAdapter.KEY_DATE);
+        COL_PAYEE = cursor.getColumnIndex(DbAdapter.KEY_PAYEE);
+        COL_AMOUNT = cursor.getColumnIndex(DbAdapter.KEY_AMOUNT);
+        COL_CATEGORY = cursor.getColumnIndex(DbAdapter.KEY_CATEGORY);
+        COL_MEMO = cursor.getColumnIndex(DbAdapter.KEY_MEMO);
+        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT};
         int[] to = new int[] {R.id.date, R.id.payee, R.id.amount};
         SimpleCursorAdapter list = 
         	    new SimpleCursorAdapter(this, R.layout.row, cursor, from, to);
+        list.setViewBinder(mViewBinder);
         setListAdapter(list);
+        mDbHelper.close();
     }
     
-    @Override
+	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         menu.add(0, INSERT_ID, 0, R.string.menu_insert);
@@ -151,6 +167,7 @@ public class Main extends ListActivity {
      * @return
      */
 	protected String export() {
+		mDbHelper.open();
     	Cursor cursor = mDbHelper.fetchAll();
         startManagingCursor(cursor);
     	StringBuilder builder = new StringBuilder();
@@ -163,7 +180,11 @@ public class Main extends ListActivity {
         	while (!last) {
         		amount = cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_AMOUNT));
         		builder.append(QIF_DATE);
-        		builder.append(cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE)));
+				Long dateTime = cursor.getLong(cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE));
+				Date date = new Date();
+				date.setTime(dateTime);
+				String text = dateFormatter.format(date);
+        		builder.append(text);
         		builder.append("\n");
         		builder.append(QIF_PAYEE);
         		builder.append(cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
@@ -192,11 +213,7 @@ public class Main extends ListActivity {
         try {
             File root = Environment.getExternalStorageDirectory();
             if (root.canWrite()){
-    			final Calendar c = Calendar.getInstance();
-    			int year = c.get(Calendar.YEAR);
-    			int monthOfYear = c.get(Calendar.MONTH);
-    			int dayOfMonth = c.get(Calendar.DAY_OF_MONTH);
-    			String date = Edit.dateToText(year, monthOfYear, dayOfMonth);
+    			String date = dateFormatter.format(new Date());
     			File file = new File(root, date + ".qif");
                 FileWriter writer = new FileWriter(file);
                 BufferedWriter out = new BufferedWriter(writer);
@@ -207,6 +224,46 @@ public class Main extends ListActivity {
         } catch (IOException e) {
 //            Log.e(TAG, "Could not write file " + e.getMessage());
         }
+        mDbHelper.close();
         return result;
+	}
+
+	private SimpleCursorAdapter.ViewBinder mViewBinder = new SimpleCursorAdapter.ViewBinder() {
+		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+			TextView textview = (TextView) view;
+			String text;
+			if (columnIndex == COL_DATE) {
+				Long dateTime = cursor.getLong(columnIndex);
+				Date date = new Date();
+				date.setTime(dateTime);
+				text = dateFormatter.format(date);
+				textview.setText(text);
+			}
+			if (columnIndex == COL_PAYEE) {
+				String payee = cursor.getString(columnIndex);
+				textview.setText(payee);
+			}
+			if (columnIndex == COL_AMOUNT) {
+				Double amount = cursor.getDouble(columnIndex);
+				if (amount != null)
+					textview.setText(amountFormatter.format(amount));
+			}
+			if (columnIndex == COL_CATEGORY) {
+				String category = cursor.getString(columnIndex);
+				textview.setText(category);
+			}
+			if (columnIndex == COL_MEMO) {
+				String memo = cursor.getString(columnIndex);
+				textview.setText(memo);
+			}
+			return true;
+		}
+	};
+	protected Calendar timeToCalendar(Long dateTime) {
+		Date date = new Date();
+		date.setTime(dateTime);
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
+		return cal;
 	}
 }

@@ -15,11 +15,15 @@ package com.cash2qif.www;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -30,22 +34,19 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 
 public class Edit extends Activity {
-	private static final String DATE_DIVIDER = "-";
 	static final int ID_DATEPICKER = 0;
-	private int myYear, myMonth, myDay;
+	private int mYear, mMonth, mDay;
 	private Button mDatePickerText;
     private EditText mPayeeText;
     private EditText mAmountText;
     private EditText mCategoryText;
     private EditText mMemoText;
     private Long mRowId;
-    private DbAdapter mDbHelper;
+    private DbAdapter mDbHelper = new DbAdapter(this);
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mDbHelper = new DbAdapter(this);
-        mDbHelper.open();        
         setContentView(R.layout.edit);
 		Button datePickerButton = (Button)findViewById(R.id.datepickerbutton);
 		datePickerButton.setOnClickListener(datePickerButtonOnClickListener);
@@ -78,6 +79,7 @@ public class Edit extends Activity {
     }
 
 	private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField) {
+		mDbHelper.open();
 		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(autoCompleteViewId);
 	    Cursor cursor = mDbHelper.fetch(dbField);
 	    if (cursor != null) {
@@ -92,14 +94,24 @@ public class Edit extends Activity {
     		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, editViewId, field);
     		textView.setAdapter(adapter);
 	    }
+	    mDbHelper.close();
 	}
 
     private void populate() {
         if (mRowId != null) {
+            mDbHelper.open();
             Cursor cursor = mDbHelper.fetch(mRowId);
             startManagingCursor(cursor);
-            mDatePickerText.setText(cursor.getString(
-                        cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE)));
+    		Date date = new Date();
+    		Long dateTime = cursor.getLong(
+    			cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE));
+    		Calendar cal = Calendar.getInstance();
+    		date.setTime(dateTime);
+    		cal.setTime(date);
+    		mYear = cal.get(Calendar.YEAR);
+    		mMonth = cal.get(Calendar.MONTH);
+    		mDay = cal.get(Calendar.DAY_OF_MONTH);
+            mDatePickerText.setText(Main.dateFormatter.format(date));
             mPayeeText.setText(cursor.getString(
                     cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
             mAmountText.setText(cursor.getString(
@@ -108,12 +120,10 @@ public class Edit extends Activity {
                     cursor.getColumnIndexOrThrow(DbAdapter.KEY_CATEGORY)));
             mMemoText.setText(cursor.getString(
                     cursor.getColumnIndexOrThrow(DbAdapter.KEY_MEMO)));
+            mDbHelper.close();
         } else { // new entry
-			final Calendar c = Calendar.getInstance();
-			String date = dateToText(c.get(Calendar.YEAR), 
-					c.get(Calendar.MONTH), 
-					c.get(Calendar.DAY_OF_MONTH));
-            mDatePickerText.setText(date);
+			setToday();
+			updateDate();
         }
     }
 
@@ -121,10 +131,10 @@ public class Edit extends Activity {
 	= new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
-			final Calendar c = Calendar.getInstance();
-			myYear = c.get(Calendar.YEAR);
-			myMonth = c.get(Calendar.MONTH);
-			myDay = c.get(Calendar.DAY_OF_MONTH);
+			final Calendar cal = Calendar.getInstance();
+			mYear = cal.get(Calendar.YEAR);
+			mMonth = cal.get(Calendar.MONTH);
+			mDay = cal.get(Calendar.DAY_OF_MONTH);
 			showDialog(ID_DATEPICKER);
 		}
 	};
@@ -133,9 +143,12 @@ public class Edit extends Activity {
 	protected Dialog onCreateDialog(int id) {
 		switch(id) {
 		case ID_DATEPICKER:
-			return new DatePickerDialog(this,
-					myDateSetListener,
-					myYear, myMonth, myDay);
+			DatePickerDialog dialog = 
+				new DatePickerDialog(this,
+						myDateSetListener,
+						mYear, mMonth, mDay);
+				dialog.setButton3(getString(R.string.today), todayListener);
+				return dialog; 
 		default:
 			return null;
 		}
@@ -146,18 +159,26 @@ public class Edit extends Activity {
 		@Override
 		public void onDateSet(DatePicker view, int year, 
 				int monthOfYear, int dayOfMonth) {
-			String date = dateToText(year, monthOfYear, dayOfMonth);
-            mDatePickerText.setText(date);
+            mYear = year;
+            mMonth = monthOfYear;
+            mDay = dayOfMonth;
+			updateDate();
 		} 
 	};
-	public static String dateToText(int year, int monthOfYear, int dayOfMonth) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(String.valueOf(monthOfYear+1));
-		builder.append(DATE_DIVIDER);
-		builder.append(String.valueOf(dayOfMonth));
-		builder.append(DATE_DIVIDER);
-		builder.append(String.valueOf(year));
-		return builder.toString(); 
+	
+	private DialogInterface.OnClickListener todayListener = new DialogInterface.OnClickListener() {
+		public void onClick(DialogInterface intf, int which) {
+			setToday();
+			updateDate();
+		}
+	};
+	
+	private void setToday() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(System.currentTimeMillis());
+		mYear = cal.get(Calendar.YEAR);
+		mMonth = cal.get(Calendar.MONTH);
+		mDay = cal.get(Calendar.DAY_OF_MONTH);
 	}
 
     @Override
@@ -177,39 +198,45 @@ public class Edit extends Activity {
         populate();
     }
     private void saveState() {
-        String date = null;
-        String payee = null;
-        String amount = null;
-        String category = null;
-        String memo = null;
-        if (mDatePickerText != null && mDatePickerText.getText() != null)
-        	date = mDatePickerText.getText().toString();
+        ContentValues values = new ContentValues();
+		GregorianCalendar cal = new GregorianCalendar(mYear, mMonth, mDay);
+        values.put(DbAdapter.KEY_DATE, cal.getTimeInMillis());
         if (mPayeeText != null && mPayeeText.getText() != null)
-        	payee = mPayeeText.getText().toString();
+        	values.put(DbAdapter.KEY_PAYEE, mPayeeText.getText().toString());
         if (mAmountText != null && mAmountText.getText() != null)
-        	amount = mAmountText.getText().toString();
+        	values.put(DbAdapter.KEY_AMOUNT, mAmountText.getText().toString());
         if (mCategoryText != null && mCategoryText.getText() != null)
-        	category = mCategoryText.getText().toString();
+        	values.put(DbAdapter.KEY_CATEGORY, mCategoryText.getText().toString());
         if (mMemoText != null && mMemoText.getText() != null)
-        	memo = mMemoText.getText().toString();
+        	values.put(DbAdapter.KEY_MEMO, mMemoText.getText().toString());
 
-        if (mRowId == null) {
-        	if (validate(date, payee, amount, category, memo)) {
-        		long id = mDbHelper.create(date, payee, amount, category, memo);
-        		if (id > 0) {
-        			mRowId = id;
-        		}
-        	}
-        } else {
-        	if (validate(date, payee, amount, category, memo))
-        		mDbHelper.update(mRowId, date, payee, amount, category, memo);
-        }
+    	if (validate(values)) {
+    		mDbHelper.open();
+    		if (mRowId == null) {
+    			long id = mDbHelper.create(values);
+    			if (id > 0) {
+    				mRowId = id;
+    			}
+    		} else {
+    			mDbHelper.update(mRowId, values);
+    		}
+    		mDbHelper.close();
+    	}
     }
-    private boolean validate(String date, String payee, String amount, String category, String memo) {
-    	return notNull(date) && (notNull(payee) || notNull(amount) || notNull(category)|| notNull(memo));	
+    private boolean validate(ContentValues values) {
+    	return (values != null && 
+    	values.getAsInteger(DbAdapter.KEY_DATE) != null &&
+    	notNull(values.getAsString(DbAdapter.KEY_PAYEE)));	
     }
 
 	public boolean notNull(String s) {
     	return s != null && s.length() > 0;
     }
+
+	protected void updateDate() {
+		GregorianCalendar cal = new GregorianCalendar(mYear, mMonth, mDay);
+		Date date = new Date();
+		date.setTime(cal.getTimeInMillis());
+		mDatePickerText.setText(Main.dateFormatter.format(date));
+	}
 }
