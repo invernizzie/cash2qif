@@ -13,12 +13,7 @@
  */
 package com.cash2qif.www;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,7 +21,6 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Environment;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,32 +29,32 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class Main extends ListActivity {
     private static final int ACTIVITY_CREATE = 0;
     private static final int ACTIVITY_EDIT = 1;
     private static final int ACTIVITY_DELETE_ALL = 2;
+    private static final int ACTIVITY_EXPORT = 3;
+    private static final int ACTIVITY_IMPORT = 4;
     private static final int INSERT_ID = Menu.FIRST;
     private static final int EXPORT_ID = Menu.FIRST + 1;
     private static final int DELETE_ALL_ID = Menu.FIRST + 2;
     private static final int DELETE_ID = Menu.FIRST + 3;
-    private static final String MINUS = "-";
-	private static final String QIF_HEADER = "!Type:Cash ";
-    private static final String QIF_DATE = "D";
-    private static final String QIF_AMOUNT = "T";
-    private static final String QIF_PAYEE = "P";
-    private static final String QIF_CATEGORY = "L";
-    private static final String QIF_MEMO = "M";
-    private static final String QIF_DIVIDER = "^";
+    private static final int IMPORT_ID = Menu.FIRST + 4;
+    public static final String QIF_HEADER = "!Type:Cash ";
+    public static final char QIF_DATE = 'D';
+    public static final char QIF_AMOUNT = 'T';
+    public static final char QIF_PAYEE = 'P';
+    public static final char QIF_CATEGORY = 'L';
+    public static final char QIF_MEMO = 'M';
+    public static final char QIF_DIVIDER = '^';
 	private int COL_DATE;
 	private int COL_PAYEE;
 	private int COL_AMOUNT;
 	private int COL_CATEGORY;
 	private int COL_MEMO;
 	private DecimalFormat amountFormatter = new DecimalFormat("#,##0.00");
-	public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy");
     private DbAdapter mDbHelper = new DbAdapter(this);
 
     @Override
@@ -71,6 +65,9 @@ public class Main extends ListActivity {
         registerForContextMenu(getListView());
     }
 
+    /**
+     * Fill data for the list page.
+     */
 	private void fillData() {
         mDbHelper.open();
     	Cursor cursor = mDbHelper.fetchAll();
@@ -95,6 +92,7 @@ public class Main extends ListActivity {
         menu.add(0, INSERT_ID, 0, R.string.menu_insert);
         menu.add(1, EXPORT_ID, 0, R.string.menu_export);
         menu.add(2, DELETE_ALL_ID, 0, R.string.menu_delete_all);
+        menu.add(3, IMPORT_ID, 0, R.string.menu_import);
         return true;
     }
 
@@ -111,10 +109,17 @@ public class Main extends ListActivity {
         	confirmDeleteAll();
 	        fillData();
         	return true;
+        case IMPORT_ID:
+        	importFile();
+	        fillData();
+        	return true;
         }
         return super.onMenuItemSelected(featureId, item);
     }
 	
+    /**
+     * Confirmation to avoid accidentally deleting all.
+     */
     private void confirmDeleteAll() {
         Intent i = new Intent(this, DeleteAll.class);
         startActivityForResult(i, ACTIVITY_DELETE_ALL);
@@ -139,11 +144,30 @@ public class Main extends ListActivity {
 		return super.onContextItemSelected(item);
 	}
 	
+    /**
+     * Create a new entry.
+     */
     private void create() {
         Intent i = new Intent(this, Edit.class);
         startActivityForResult(i, ACTIVITY_CREATE);
     }
     
+    /**
+     * Export all entries.
+     */
+    private void export() {
+        Intent i = new Intent(this, Export.class);
+        startActivityForResult(i, ACTIVITY_EXPORT);
+    }
+
+    /**
+     * Import from a .QIF file.
+     */
+    private void importFile() {
+        Intent i = new Intent(this, Import.class);
+        startActivityForResult(i, ACTIVITY_IMPORT);
+	}
+
     @Override
     protected void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
@@ -162,73 +186,9 @@ public class Main extends ListActivity {
     }
 
     /**
-     * Exports each entry into an Excel readable .QIF file on the
-     * SD card.
-     * @return
+     * Map from view fields to database columns.
      */
-	protected String export() {
-		mDbHelper.open();
-    	Cursor cursor = mDbHelper.fetchAll();
-        startManagingCursor(cursor);
-    	StringBuilder builder = new StringBuilder();
-        if (cursor.getCount() > 0) {
-        	cursor.moveToFirst();
-    		builder.append(QIF_HEADER);
-    		builder.append("\n");
-        	boolean last = false;
-        	String amount;
-        	while (!last) {
-        		amount = cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_AMOUNT));
-        		builder.append(QIF_DATE);
-				Long dateTime = cursor.getLong(cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE));
-				Date date = new Date();
-				date.setTime(dateTime);
-				String text = dateFormatter.format(date);
-        		builder.append(text);
-        		builder.append("\n");
-        		builder.append(QIF_PAYEE);
-        		builder.append(cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
-        		builder.append("\n");
-        		builder.append(QIF_AMOUNT);
-        		if (amount != null && amount.length() > 0) {
-        			if (!MINUS.equals(amount.substring(0, 1))) {
-        				builder.append(MINUS); // debit, so prepend a minus
-        				builder.append(amount);
-        			} else builder.append(amount.substring(1, amount.length())); // credit, so remove minus
-        		}
-        		builder.append("\n");
-        		builder.append(QIF_CATEGORY);
-        		builder.append(cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_CATEGORY)));
-        		builder.append("\n");
-        		builder.append(QIF_MEMO);
-        		builder.append(cursor.getString(cursor.getColumnIndexOrThrow(DbAdapter.KEY_MEMO)));
-        		builder.append("\n");
-        		builder.append(QIF_DIVIDER);
-        		builder.append("\n");
-        		last = cursor.isLast();
-        		cursor.moveToNext();
-        	}
-        }
-        String result = builder.toString();
-        try {
-            File root = Environment.getExternalStorageDirectory();
-            if (root.canWrite()){
-    			String date = dateFormatter.format(new Date());
-    			File file = new File(root, date + ".qif");
-                FileWriter writer = new FileWriter(file);
-                BufferedWriter out = new BufferedWriter(writer);
-                out.write(result);
-                out.close();
-                Toast.makeText(this, file + " created.", Toast.LENGTH_LONG).show();
-            }
-        } catch (IOException e) {
-//            Log.e(TAG, "Could not write file " + e.getMessage());
-        }
-        mDbHelper.close();
-        return result;
-	}
-
-	private SimpleCursorAdapter.ViewBinder mViewBinder = new SimpleCursorAdapter.ViewBinder() {
+    private SimpleCursorAdapter.ViewBinder mViewBinder = new SimpleCursorAdapter.ViewBinder() {
 		public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
 			TextView textview = (TextView) view;
 			String text;
@@ -236,7 +196,7 @@ public class Main extends ListActivity {
 				Long dateTime = cursor.getLong(columnIndex);
 				Date date = new Date();
 				date.setTime(dateTime);
-				text = dateFormatter.format(date);
+				text = Utils.dateFormatter.format(date);
 				textview.setText(text);
 			}
 			if (columnIndex == COL_PAYEE) {
@@ -259,6 +219,12 @@ public class Main extends ListActivity {
 			return true;
 		}
 	};
+	
+	/**
+	 * Create a calendar given a dateTime.
+	 * @param dateTime
+	 * @return
+	 */
 	protected Calendar timeToCalendar(Long dateTime) {
 		Date date = new Date();
 		date.setTime(dateTime);

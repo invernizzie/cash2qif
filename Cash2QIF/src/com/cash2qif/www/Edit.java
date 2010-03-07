@@ -78,7 +78,13 @@ public class Edit extends Activity {
         });
     }
 
-	private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField) {
+    /**
+     * Make a drop down autoComplete field.
+     * @param autoCompleteViewId
+     * @param editViewId
+     * @param dbField
+     */
+    private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField) {
 		mDbHelper.open();
 		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(autoCompleteViewId);
 	    Cursor cursor = mDbHelper.fetch(dbField);
@@ -97,6 +103,9 @@ public class Edit extends Activity {
 	    mDbHelper.close();
 	}
 
+    /**
+     * Populate an entry with values from the database if it exists.
+     */
     private void populate() {
         if (mRowId != null) {
             mDbHelper.open();
@@ -111,7 +120,7 @@ public class Edit extends Activity {
     		mYear = cal.get(Calendar.YEAR);
     		mMonth = cal.get(Calendar.MONTH);
     		mDay = cal.get(Calendar.DAY_OF_MONTH);
-            mDatePickerText.setText(Main.dateFormatter.format(date));
+            mDatePickerText.setText(Utils.dateFormatter.format(date));
             mPayeeText.setText(cursor.getString(
                     cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
             mAmountText.setText(cursor.getString(
@@ -127,7 +136,10 @@ public class Edit extends Activity {
         }
     }
 
-	private Button.OnClickListener datePickerButtonOnClickListener
+    /**
+     * OnClickListener for the datePickerButton.
+     */
+    private Button.OnClickListener datePickerButtonOnClickListener
 	= new Button.OnClickListener() {
 		@Override
 		public void onClick(View v) {
@@ -154,6 +166,9 @@ public class Edit extends Activity {
 		}
 	}
 	
+	/**
+	 * When a Date is set, update member fields and the display.
+	 */
 	private DatePickerDialog.OnDateSetListener myDateSetListener
 	= new DatePickerDialog.OnDateSetListener() {
 		@Override
@@ -166,6 +181,9 @@ public class Edit extends Activity {
 		} 
 	};
 	
+	/**
+	 * OnClickListener for the Today button in the date picker.
+	 */
 	private DialogInterface.OnClickListener todayListener = new DialogInterface.OnClickListener() {
 		public void onClick(DialogInterface intf, int which) {
 			setToday();
@@ -173,6 +191,9 @@ public class Edit extends Activity {
 		}
 	};
 	
+	/**
+	 * Set member fields to the values for Today.
+	 */
 	private void setToday() {
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(System.currentTimeMillis());
@@ -197,6 +218,10 @@ public class Edit extends Activity {
         super.onResume();
         populate();
     }
+    
+    /**
+     * Save values for the current entry.
+     */
     private void saveState() {
         ContentValues values = new ContentValues();
 		GregorianCalendar cal = new GregorianCalendar(mYear, mMonth, mDay);
@@ -223,20 +248,34 @@ public class Edit extends Activity {
     		mDbHelper.close();
     	}
     }
+    
+    /**
+     * Validate that date and payee are not empty.
+     * @param values
+     * @return
+     */
     private boolean validate(ContentValues values) {
     	return (values != null && 
     	values.getAsInteger(DbAdapter.KEY_DATE) != null &&
-    	notNull(values.getAsString(DbAdapter.KEY_PAYEE)));	
+    	notEmpty(values.getAsString(DbAdapter.KEY_PAYEE)));	
     }
 
-	public boolean notNull(String s) {
+    /**
+     * Check a String is not null or empty.
+     * @param s
+     * @return
+     */
+	public boolean notEmpty(String s) {
     	return s != null && s.length() > 0;
     }
 
+	/**
+	 * Get selected date and update the text on the screen.
+	 */
 	protected void updateDate() {
 		GregorianCalendar cal = new GregorianCalendar(mYear, mMonth, mDay);
 		Date date = new Date();
 		date.setTime(cal.getTimeInMillis());
-		mDatePickerText.setText(Main.dateFormatter.format(date));
+		mDatePickerText.setText(Utils.dateFormatter.format(date));
 	}
 }

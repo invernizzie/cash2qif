@@ -15,4 +15,6 @@
     <string name="exportText"></string>
 	<string name="today">Today</string>
     <string name="menu_export">Export</string>
+    <string name="menu_import">Import</string>
+    <string name="file">File Name</string>
 </resources>

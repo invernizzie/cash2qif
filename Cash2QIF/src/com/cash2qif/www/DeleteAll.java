@@ -10,11 +10,15 @@ public class DeleteAll extends Activity {
     public static final int DIALOG_DELETE_CONFIRMATION_ID = 0;
     private DbAdapter mDbHelper = new DbAdapter(this);
 
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     	showDialog(DIALOG_DELETE_CONFIRMATION_ID);
     }
     
+    /**
+     * Dialog to confirm deleteAll.
+     */
     protected Dialog onCreateDialog(int id) {
         Dialog dialog = null;
         switch(id) {
@@ -39,6 +43,10 @@ public class DeleteAll extends Activity {
         return dialog;
     }
     
+    /**
+     * Delete all in the database.
+     * @return
+     */
     public boolean deleteAll() {
         mDbHelper.open();
     	boolean result = mDbHelper.deleteAll();

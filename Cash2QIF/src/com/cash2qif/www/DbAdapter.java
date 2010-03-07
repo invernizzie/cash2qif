@@ -13,6 +13,10 @@
  */
 package com.cash2qif.www;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -58,43 +62,100 @@ public class DbAdapter {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
                     + newVersion + ", which will destroy all old data");
-            db.execSQL("DROP TABLE IF EXISTS entry");
-            onCreate(db);
+//            db.execSQL("DROP TABLE IF EXISTS entry");
+//            onCreate(db);
+            db.beginTransaction();
+            Cursor c = db.query(true, DATABASE_TABLE, new String[] {KEY_DATE}, null, null, null, null, null, null);
+            int numEntries = c.getCount();
+        	SimpleDateFormat formatter = new SimpleDateFormat();
+        	String[] dateStrings = new String[numEntries];
+            for (int i = 0; i < numEntries; i++) {
+            	String dateString = c.getString(c.getColumnIndex(KEY_DATE));
+            	dateStrings[i] = dateString;
+            }
+            for (int i = 0; i < numEntries; i++) {
+            	try {
+					Date date = formatter.parse(dateStrings[i]);
+		        	ContentValues values = new ContentValues();
+					values.put(KEY_DATE, date.getTime());
+		            db.update(DATABASE_TABLE, values, KEY_DATE + " = " + dateStrings[i], null);
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+//					e.printStackTrace();
+				}
+            }
+            db.endTransaction();
         }
     }
 
+    /**
+     * Constructor
+     * @param ctx
+     */
     public DbAdapter(Context ctx) {
         this.mCtx = ctx;
     }
 
+    /**
+     * Open the database.
+     * @return
+     * @throws SQLException
+     */
     public DbAdapter open() throws SQLException {
         mDbHelper = new DatabaseHelper(mCtx);
         mDb = mDbHelper.getWritableDatabase();
         return this;
     }
     
+    /**
+     * Close the database.
+     */
     public void close() {
     	if (mDbHelper != null)
     		mDbHelper.close();
     }
 
+    /**
+     * Insert an entry into the database.
+     * @param args
+     * @return
+     */
     public long create(ContentValues args) {
         return mDb.insert(DATABASE_TABLE, null, args);
     }
 
+    /**
+     * Delete an entry from the database.
+     * @param rowId
+     * @return
+     */
     public boolean delete(long rowId) {
         return mDb.delete(DATABASE_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
     }
 
+    /**
+     * Delete all entries from the database.
+     * @return
+     */
     public boolean deleteAll() {
         return mDb.delete(DATABASE_TABLE, null, null) > 0;
     }
 
+    /**
+     * Fetch all entries from the database.
+     * @return
+     */
     public Cursor fetchAll() {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
                 KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE);
     }
 
+    /**
+     * Fetch one entry from the database.
+     * @param rowId
+     * @return
+     * @throws SQLException
+     */
     public Cursor fetch(long rowId) throws SQLException {
         Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
         		KEY_DATE, KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
@@ -103,6 +164,12 @@ public class DbAdapter {
         return mCursor;
     }
     
+    /**
+     * Fetch all values in a given column from the database.
+     * @param column
+     * @return
+     * @throws SQLException
+     */
     public Cursor fetch(String column) throws SQLException {
         Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] {column}, null, null, null, null, null, null);
         if (mCursor != null)
@@ -110,6 +177,12 @@ public class DbAdapter {
         return mCursor;
     }
 
+    /**
+     * Update an entry in the database.
+     * @param rowId
+     * @param args
+     * @return
+     */
     public boolean update(long rowId, ContentValues args) {
         return mDb.update(DATABASE_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
     }
