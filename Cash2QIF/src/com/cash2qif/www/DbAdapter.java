@@ -147,7 +147,7 @@ public class DbAdapter {
      */
     public Cursor fetchAll() {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
-                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE);
+                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE + " desc");
     }
 
     /**

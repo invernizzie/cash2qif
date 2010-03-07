@@ -5,8 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Utils {
-    private static final String MINUS = "-";
+    private static final String QUOTE = "'";
+	private static final String SLASH = "/";
+	private static final String MINUS = "-";
 	public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy");
+	public static final SimpleDateFormat quickenFormatter = new SimpleDateFormat("MM/dd''yy");
 
 	/**
 	 * Quicken imports positive amounts as debits and negative amounts
@@ -32,10 +35,18 @@ public class Utils {
 	 */
 	public static long parseDateString(String dateString) {
 		long dateTime = -1;
-		if (dateString.contains("-")) {
-			Date date;
+		Date date;
+		if (dateString.contains(MINUS)) {
 			try {
 				date = dateFormatter.parse(dateString);
+				dateTime = date.getTime();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else if (dateString.contains(SLASH) && dateString.contains(QUOTE)) {
+			try {
+				date = quickenFormatter.parse(dateString);
 				dateTime = date.getTime();
 			} catch (ParseException e) {
 				// TODO Auto-generated catch block

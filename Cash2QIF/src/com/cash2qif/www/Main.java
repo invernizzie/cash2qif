@@ -137,8 +137,10 @@ public class Main extends ListActivity {
 		switch(item.getItemId()) {
     	case DELETE_ID:
     		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+            mDbHelper.open();
 	        mDbHelper.delete(info.id);
 	        fillData();
+	        mDbHelper.close();
 	        return true;
 		}
 		return super.onContextItemSelected(item);
