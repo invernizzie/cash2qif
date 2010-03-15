@@ -3,17 +3,9 @@
 	android:orientation="vertical" 
 	android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
-	<LinearLayout android:orientation="horizontal"
-		android:layout_width="fill_parent"
-		android:layout_height="wrap_content"
-		android:scrollbars="vertical">
-		<TextView android:layout_width="wrap_content"
-			android:layout_height="wrap_content" 
-			android:text="@string/file" />
-		<EditText android:id="@+id/fileName" 
+	<Spinner android:id="@+id/simple_spinner_dropdown_item" 
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"/>
-	</LinearLayout>
 	<Button android:id="@+id/confirm" 
 	 	android:text="@string/confirm"
 		android:layout_width="wrap_content"

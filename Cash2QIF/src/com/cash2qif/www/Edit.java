@@ -88,12 +88,13 @@ public class Edit extends Activity {
 		mDbHelper.open();
 		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(autoCompleteViewId);
 	    Cursor cursor = mDbHelper.fetch(dbField);
-	    if (cursor != null) {
+	    if (cursor != null && cursor.getCount() > 0) {
 	    	startManagingCursor(cursor);
+			int index = cursor.getColumnIndexOrThrow(dbField);
 	    	List<String> field = new ArrayList<String>();
 	    	boolean last = false;
-	    	while (!last && cursor.getCount() > 0) {
-	    		field.add(cursor.getString(cursor.getColumnIndexOrThrow(dbField)));
+	    	while (!last) {
+	    		field.add(cursor.getString(index));
 	    		last = cursor.isLast();
 	    		cursor.moveToNext();
 	    	}

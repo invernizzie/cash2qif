@@ -32,11 +32,11 @@ import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class Main extends ListActivity {
-    private static final int ACTIVITY_CREATE = 0;
-    private static final int ACTIVITY_EDIT = 1;
-    private static final int ACTIVITY_DELETE_ALL = 2;
-    private static final int ACTIVITY_EXPORT = 3;
-    private static final int ACTIVITY_IMPORT = 4;
+	public static final int ACTIVITY_CREATE = 0;
+    public static final int ACTIVITY_EDIT = 1;
+    public static final int ACTIVITY_DELETE_ALL = 2;
+    public static final int ACTIVITY_EXPORT = 3;
+    public static final int ACTIVITY_IMPORT = 4;
     private static final int INSERT_ID = Menu.FIRST;
     private static final int EXPORT_ID = Menu.FIRST + 1;
     private static final int DELETE_ALL_ID = Menu.FIRST + 2;
@@ -77,8 +77,8 @@ public class Main extends ListActivity {
         COL_AMOUNT = cursor.getColumnIndex(DbAdapter.KEY_AMOUNT);
         COL_CATEGORY = cursor.getColumnIndex(DbAdapter.KEY_CATEGORY);
         COL_MEMO = cursor.getColumnIndex(DbAdapter.KEY_MEMO);
-        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT};
-        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount};
+        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT, DbAdapter.KEY_CATEGORY, DbAdapter.KEY_MEMO};
+        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount, R.id.category, R.id.memo};
         SimpleCursorAdapter list = 
         	    new SimpleCursorAdapter(this, R.layout.row, cursor, from, to);
         list.setViewBinder(mViewBinder);

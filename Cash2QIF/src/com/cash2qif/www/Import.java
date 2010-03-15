@@ -3,39 +3,59 @@ package com.cash2qif.www;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.Date;
+import java.util.Arrays;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class Import extends Activity {
+    private static final String EMPTY = "";
     private DbAdapter mDbHelper = new DbAdapter(this);
-    private EditText mFileName;
+
+    protected final static String MESSAGE = "msg";
+	protected final static String TITLE = "title";
+	protected final static String SUCCESS = "success";
+
+	protected final static int DIALOG_FINISHED = 1;
+	protected final static int DIALOG_IMPORTING = 2;
+	public static final String SAVE_POSITION = "position";
+
+	protected String m_ext = "qif";
+	protected Spinner m_fileSelector;
+
+	protected static int s_title;
+	protected static String s_message;
+	protected static boolean s_success = false;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.file);
+        setContentView(R.layout.import_file);
 
-        mFileName = (EditText) findViewById(R.id.fileName);
-		String fileName = Utils.dateFormatter.format(new Date()) + ".qif";
-        mFileName.setText(fileName);
         Button confirmButton = (Button) findViewById(R.id.confirm);
         confirmButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-            	importFile(mFileName.getText().toString());
+            	importFile((String)m_fileSelector.getSelectedItem());
                 setResult(RESULT_OK);
                 finish();
             }
         });
+        m_fileSelector = (Spinner) findViewById(R.id.simple_spinner_dropdown_item);
+        populateFileSelector();
     }
 
     /**
@@ -54,7 +74,7 @@ public class Import extends Activity {
                 BufferedReader in = new BufferedReader(reader);
                 String line = in.readLine(); // discard header
                 Character c;
-                ContentValues values = new ContentValues();
+                ContentValues values = emptyValues();
                 int created = 0;
                 while (line != null) {
                     line = in.readLine();
@@ -87,6 +107,7 @@ public class Import extends Activity {
                         case Main.QIF_DIVIDER:
                 			mDbHelper.create(values);
                 			created++;
+                			values = emptyValues();
                 			break;
                         }
                     }
@@ -99,4 +120,66 @@ public class Import extends Activity {
         }
         mDbHelper.close();
     }
+
+    /**
+     * Create a new ContentValues with non null values.
+     * @return
+     */
+	private ContentValues emptyValues() {
+		ContentValues values = new ContentValues();
+		values.put(DbAdapter.KEY_DATE, 0);
+		values.put(DbAdapter.KEY_PAYEE, EMPTY);
+		values.put(DbAdapter.KEY_AMOUNT, EMPTY);
+		values.put(DbAdapter.KEY_CATEGORY, EMPTY);
+		values.put(DbAdapter.KEY_MEMO, EMPTY);
+		return values;
+	}
+
+	/**
+	 * Populate the import spinner with available .qif files.
+	 */
+	protected void populateFileSelector() {
+		File directory = Environment.getExternalStorageDirectory();
+		String[] files = directory.list(m_filter);
+		Arrays.sort(files);
+
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
+		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		for (String file : files) {
+			adapter.add(file);
+		}
+		m_fileSelector.setAdapter(adapter);
+	}
+
+	@Override
+	protected Dialog onCreateDialog(int which) {
+		switch (which) {
+		case DIALOG_FINISHED:
+			return new AlertDialog.Builder(this).setTitle(s_title).setMessage(s_message).setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int which) {
+					dismissDialog(DIALOG_FINISHED);
+				}
+			}).create();
+		case DIALOG_IMPORTING:
+			ProgressDialog dialog = new ProgressDialog(this);
+			dialog.setTitle(R.string.importing_title);
+			dialog.setMessage(getString(R.string.importing));
+			return dialog;
+		}
+		return null;
+	}
+
+	/**
+	 * Filter out files that don't end with an extension of m_ext.
+	 */
+	protected FilenameFilter m_filter = new FilenameFilter() {
+		public boolean accept(File dir, String filename) {
+			int begin = filename.lastIndexOf(".");
+			if (begin >= 0) {
+				String ext = filename.substring(begin + 1);
+				return ext.equalsIgnoreCase(m_ext);
+			}
+			return false;
+		}
+	};
 }

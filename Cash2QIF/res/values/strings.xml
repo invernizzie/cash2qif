@@ -17,4 +17,10 @@
     <string name="menu_export">Export</string>
     <string name="menu_import">Import</string>
     <string name="file">File Name</string>
+    <string name="export_Date">Export beginning</string>
+    <string name="importing_title">Importing title</string>
+    <string name="importing">Importing</string>
+    <string name="success">Success</string>
+    <string name="error">Error</string>
+    <string name="all">All</string>
 </resources>

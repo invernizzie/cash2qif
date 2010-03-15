@@ -13,17 +13,12 @@
  */
 package com.cash2qif.www;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 public class DbAdapter {
     public static final String KEY_DATE = "date";
@@ -33,7 +28,6 @@ public class DbAdapter {
     public static final String KEY_MEMO = "memo";
     public static final String KEY_ROWID = "_id";
 
-    private static final String TAG = "DbAdapter";
     private DatabaseHelper mDbHelper;
     private SQLiteDatabase mDb;
     
@@ -60,31 +54,6 @@ public class DbAdapter {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
-                    + newVersion + ", which will destroy all old data");
-//            db.execSQL("DROP TABLE IF EXISTS entry");
-//            onCreate(db);
-            db.beginTransaction();
-            Cursor c = db.query(true, DATABASE_TABLE, new String[] {KEY_DATE}, null, null, null, null, null, null);
-            int numEntries = c.getCount();
-        	SimpleDateFormat formatter = new SimpleDateFormat();
-        	String[] dateStrings = new String[numEntries];
-            for (int i = 0; i < numEntries; i++) {
-            	String dateString = c.getString(c.getColumnIndex(KEY_DATE));
-            	dateStrings[i] = dateString;
-            }
-            for (int i = 0; i < numEntries; i++) {
-            	try {
-					Date date = formatter.parse(dateStrings[i]);
-		        	ContentValues values = new ContentValues();
-					values.put(KEY_DATE, date.getTime());
-		            db.update(DATABASE_TABLE, values, KEY_DATE + " = " + dateStrings[i], null);
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-//					e.printStackTrace();
-				}
-            }
-            db.endTransaction();
         }
     }
 
@@ -148,6 +117,17 @@ public class DbAdapter {
     public Cursor fetchAll() {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
                 KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE + " desc");
+    }
+
+    /**
+     * Fetch all entries starting at dateTime.
+     * @param dateTime
+     * @return
+     */
+    public Cursor fetchStarting(Long dateTime) {
+        return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
+                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, KEY_DATE + " >= ?", 
+                new String[] {dateTime.toString()}, null, null, KEY_DATE + " desc");
     }
 
     /**
