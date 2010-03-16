@@ -20,6 +20,7 @@
     <string name="export_Date">Export beginning</string>
     <string name="importing_title">Importing title</string>
     <string name="importing">Importing</string>
+    <string name="import_file">Import</string>
     <string name="success">Success</string>
     <string name="error">Error</string>
     <string name="all">All</string>
