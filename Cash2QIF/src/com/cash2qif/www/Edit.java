@@ -24,6 +24,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
@@ -51,8 +52,14 @@ public class Edit extends Activity {
 		Button datePickerButton = (Button)findViewById(R.id.datepickerbutton);
 		datePickerButton.setOnClickListener(datePickerButtonOnClickListener);
         
+		SharedPreferences settings = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+		boolean defaultCategories = settings.getBoolean("default_categories", false);
+		String[] categories = null;
+		if (defaultCategories)
+			categories = Constants.CATEGORIES; 
+		
 	    autoCompleteField(R.id.autocomplete_payee, R.layout.payees, DbAdapter.KEY_PAYEE);
-	    autoCompleteField(R.id.autocomplete_category, R.layout.categories, DbAdapter.KEY_CATEGORY);
+	    autoCompleteField(R.id.autocomplete_category, R.layout.categories, DbAdapter.KEY_CATEGORY, categories);
 	    autoCompleteField(R.id.autocomplete_memo, R.layout.memos, DbAdapter.KEY_MEMO);
 
 	    mDatePickerText = (Button) findViewById(R.id.datepickerbutton);
@@ -85,6 +92,18 @@ public class Edit extends Activity {
      * @param dbField
      */
     private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField) {
+    	autoCompleteField(autoCompleteViewId, editViewId, dbField, null);
+    }
+    
+    /**
+     * Make a drop down autoComplete field, combining defaultValues with the
+     * values from dbField.
+     * @param autoCompleteViewId
+     * @param editViewId
+     * @param dbField
+     * @param defaultValues
+     */
+    private void autoCompleteField(int autoCompleteViewId, int editViewId, String dbField, String[] defaultValues) {
 		mDbHelper.open();
 		AutoCompleteTextView textView = (AutoCompleteTextView) findViewById(autoCompleteViewId);
 	    Cursor cursor = mDbHelper.fetch(dbField);
@@ -92,6 +111,9 @@ public class Edit extends Activity {
 	    	startManagingCursor(cursor);
 			int index = cursor.getColumnIndexOrThrow(dbField);
 	    	List<String> field = new ArrayList<String>();
+	    	if (defaultValues != null)
+	    		for (String value: defaultValues)
+	    			field.add(value);
 	    	boolean last = false;
 	    	while (!last) {
 	    		field.add(cursor.getString(index));

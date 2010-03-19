@@ -6,6 +6,7 @@
     <string name="edit">Edit</string>
     <string name="menu_delete">Delete entry</string>
     <string name="menu_delete_all">Delete all</string>
+    <string name="menu_settings">Settings</string>
     <string name="date">Date</string>
     <string name="payee">Payee</string>
     <string name="amount">Amount</string>

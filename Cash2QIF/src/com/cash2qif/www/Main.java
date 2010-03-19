@@ -37,11 +37,13 @@ public class Main extends ListActivity {
     public static final int ACTIVITY_DELETE_ALL = 2;
     public static final int ACTIVITY_EXPORT = 3;
     public static final int ACTIVITY_IMPORT = 4;
+    public static final int ACTIVITY_SETTINGS = 5;
     private static final int INSERT_ID = Menu.FIRST;
     private static final int EXPORT_ID = Menu.FIRST + 1;
     private static final int DELETE_ALL_ID = Menu.FIRST + 2;
     private static final int DELETE_ID = Menu.FIRST + 3;
     private static final int IMPORT_ID = Menu.FIRST + 4;
+	private static final int SETTINGS_ID = Menu.FIRST + 5;
     public static final String QIF_HEADER = "!Type:Cash ";
     public static final char QIF_DATE = 'D';
     public static final char QIF_AMOUNT = 'T';
@@ -93,6 +95,7 @@ public class Main extends ListActivity {
         menu.add(1, EXPORT_ID, 0, R.string.menu_export);
         menu.add(2, DELETE_ALL_ID, 0, R.string.menu_delete_all);
         menu.add(3, IMPORT_ID, 0, R.string.menu_import);
+        menu.add(4, SETTINGS_ID, 0, R.string.menu_settings);
         return true;
     }
 
@@ -113,11 +116,22 @@ public class Main extends ListActivity {
         	importFile();
 	        fillData();
         	return true;
+        case SETTINGS_ID:
+        	settings();
+        	return true;
         }
         return super.onMenuItemSelected(featureId, item);
     }
 	
     /**
+     * Go to settings page
+     */
+    private void settings() {
+        Intent i = new Intent(this, Settings.class);
+        startActivityForResult(i, ACTIVITY_SETTINGS);
+	}
+
+	/**
      * Confirmation to avoid accidentally deleting all.
      */
     private void confirmDeleteAll() {
