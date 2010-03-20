@@ -25,4 +25,7 @@
     <string name="success">Success</string>
     <string name="error">Error</string>
     <string name="all">All</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_every">Days between repeat</string>
+    <string name="repeat_for">Number of repeats</string>
 </resources>

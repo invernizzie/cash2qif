@@ -24,6 +24,7 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -83,6 +84,34 @@ public class Edit extends Activity {
                 finish();
             }
         });
+        Button repeatButton = (Button) findViewById(R.id.repeat);
+        repeatButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	repeat();
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
+    }
+
+    /**
+     * Repeat an entry
+     */
+    private void repeat() {
+        Intent i = new Intent(this, Repeat.class);
+        Bundle values = new Bundle();
+		GregorianCalendar cal = new GregorianCalendar(mYear, mMonth, mDay);
+        values.putLong(DbAdapter.KEY_DATE, cal.getTimeInMillis());
+        if (mPayeeText != null && mPayeeText.getText() != null)
+        	values.putString(DbAdapter.KEY_PAYEE, mPayeeText.getText().toString());
+        if (mAmountText != null && mAmountText.getText() != null)
+        	values.putString(DbAdapter.KEY_AMOUNT, mAmountText.getText().toString());
+        if (mCategoryText != null && mCategoryText.getText() != null)
+        	values.putString(DbAdapter.KEY_CATEGORY, mCategoryText.getText().toString());
+        if (mMemoText != null && mMemoText.getText() != null)
+        	values.putString(DbAdapter.KEY_MEMO, mMemoText.getText().toString());
+        i.putExtras(values);
+        startActivity(i);
     }
 
     /**
@@ -258,7 +287,7 @@ public class Edit extends Activity {
         if (mMemoText != null && mMemoText.getText() != null)
         	values.put(DbAdapter.KEY_MEMO, mMemoText.getText().toString());
 
-    	if (validate(values)) {
+    	if (Utils.validate(values)) {
     		mDbHelper.open();
     		if (mRowId == null) {
     			long id = mDbHelper.create(values);
@@ -272,26 +301,6 @@ public class Edit extends Activity {
     	}
     }
     
-    /**
-     * Validate that date and payee are not empty.
-     * @param values
-     * @return
-     */
-    private boolean validate(ContentValues values) {
-    	return (values != null && 
-    	values.getAsInteger(DbAdapter.KEY_DATE) != null &&
-    	notEmpty(values.getAsString(DbAdapter.KEY_PAYEE)));	
-    }
-
-    /**
-     * Check a String is not null or empty.
-     * @param s
-     * @return
-     */
-	public boolean notEmpty(String s) {
-    	return s != null && s.length() > 0;
-    }
-
 	/**
 	 * Get selected date and update the text on the screen.
 	 */

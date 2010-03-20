@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.content.ContentValues;
+
 public class Utils {
     private static final String QUOTE = "'";
 	private static final String SLASH = "/";
@@ -67,4 +69,25 @@ public class Utils {
 		date.setTime(dateTime);
 		return dateFormatter.format(date);
 	}
+
+    /**
+     * Validate that date and payee are not empty.
+     * @param values
+     * @return
+     */
+    public static boolean validate(ContentValues values) {
+    	return (values != null && 
+    	values.getAsInteger(DbAdapter.KEY_DATE) != null &&
+    	notEmpty(values.getAsString(DbAdapter.KEY_PAYEE)));	
+    }
+
+    /**
+     * Check a String is not null or empty.
+     * @param s
+     * @return
+     */
+	public static boolean notEmpty(String s) {
+    	return s != null && s.length() > 0;
+    }
+
 }
