@@ -63,7 +63,6 @@ public class Main extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
-        fillData();
         registerForContextMenu(getListView());
     }
 
@@ -247,5 +246,11 @@ public class Main extends ListActivity {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		return cal;
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+        fillData();
 	}
 }
