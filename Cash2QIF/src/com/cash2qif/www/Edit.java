@@ -23,12 +23,15 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -70,13 +73,9 @@ public class Edit extends Activity {
         mMemoText = (EditText) findViewById(R.id.autocomplete_memo);
         
         Button confirmButton = (Button) findViewById(R.id.confirm);
-        mRowId = savedInstanceState != null ? savedInstanceState.getLong(DbAdapter.KEY_ROWID) 
+        Bundle extras = getIntent().getExtras();            
+        mRowId = extras != null ? extras.getLong(DbAdapter.KEY_ROWID) 
         		: null;
-        if (mRowId == null) {
-        	Bundle extras = getIntent().getExtras();            
-        	mRowId = extras != null ? extras.getLong(DbAdapter.KEY_ROWID) 
-        			: null;
-        }
         populate();
         confirmButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -310,4 +309,31 @@ public class Edit extends Activity {
 		date.setTime(cal.getTimeInMillis());
 		mDatePickerText.setText(Utils.dateFormatter.format(date));
 	}
+
+	/**
+	 * When in landscape, make the AutoComplete Next/Done buttons work.
+	 */
+	@Override
+	public boolean onKeyUp (int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_ENTER) {
+			if (mPayeeText.hasFocus()) {
+				//sends focus to mAmountText (user pressed "Next")
+				mAmountText.requestFocus();
+				return true;
+			}
+			else if (mCategoryText.hasFocus()) {
+				//sends focus to mMemoText (user pressed "Next")
+				mMemoText.requestFocus();
+				return true;
+			} else if (mMemoText.hasFocus()) {
+				//closes soft keyboard (user pressed "Done")
+				InputMethodManager inputManager = (InputMethodManager)
+				getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.hideSoftInputFromWindow(mMemoText.getWindowToken
+						(), InputMethodManager.HIDE_NOT_ALWAYS);
+				return true;
+			}
+		}
+		return false;
+	} 
 }
