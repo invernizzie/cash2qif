@@ -140,13 +140,14 @@ public class Import extends Activity {
 	 */
 	protected void populateFileSelector() {
 		File directory = Environment.getExternalStorageDirectory();
-		String[] files = directory.list(m_filter);
-		Arrays.sort(files);
-
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item);
 		adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		for (String file : files) {
-			adapter.add(file);
+		String[] files = directory.list(m_filter);
+		if (files != null) {
+			Arrays.sort(files);
+			for (String file : files) {
+				adapter.add(file);
+			}
 		}
 		m_fileSelector.setAdapter(adapter);
 	}
