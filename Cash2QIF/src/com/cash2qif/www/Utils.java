@@ -55,7 +55,14 @@ public class Utils {
 				e.printStackTrace();
 			}
 		}
-		else dateTime = Long.parseLong(dateString);
+		else {
+			try {
+				dateTime = Long.parseLong(dateString);
+			} catch (NumberFormatException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		return dateTime;
 	}
 
