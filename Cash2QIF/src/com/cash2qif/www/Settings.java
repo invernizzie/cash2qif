@@ -5,6 +5,7 @@ import android.preference.PreferenceActivity;
 
 public class Settings extends PreferenceActivity {
 	public static final String SETTINGS_NAME = "com.cash2qif.www_preferences";
+	public static final String EMAIL_ADDRESS = "email_address";
 
 	@Override
     protected void onCreate(Bundle savedInstanceState) {

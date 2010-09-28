@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Cash2QIF</string>
+    <string name="address">Email address</string>
+    <string name="email_summary">Email address to send .QIF file</string>
     <string name="empty">No entries.  Press Menu.</string>
     <string name="menu_insert">Add entry</string>
     <string name="edit">Edit</string>
@@ -28,4 +30,6 @@
     <string name="repeat">Repeat</string>
     <string name="repeat_every">Days between repeat</string>
     <string name="repeat_for">Number of repeats</string>
+    <string name="send_email">Confirm and email</string>
+    <string name="default_email">\@gmail.com</string>
 </resources>

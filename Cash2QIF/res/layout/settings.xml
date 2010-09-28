@@ -7,4 +7,9 @@
 	<CheckBoxPreference android:key="default_categories"
 		android:defaultValue="true"
 		android:title="Show default categories"/>
+	<EditTextPreference
+		android:key="email_address"
+		android:defaultValue="@string/default_email"
+		android:title="Email Address"
+		android:summary="@string/email_summary"/>
 </PreferenceScreen>

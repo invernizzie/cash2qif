@@ -12,7 +12,10 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -49,6 +52,14 @@ public class Export extends Activity {
                 finish();
             }
         });
+        Button emailButton = (Button) findViewById(R.id.email);
+        emailButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+            	email(mFileName.getText().toString(), new GregorianCalendar(mYear, mMonth, mDay).getTimeInMillis());
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     /**
@@ -78,6 +89,36 @@ public class Export extends Activity {
         String result = export(fileName, cursor);
         mDbHelper.close();
         return result;
+	}
+
+	/**
+     * Save a .QIF file to SD card and email a copy of it.
+	 * @param fileName
+	 * @param dateTime
+	 * @return
+	 */
+	protected void email(String fileName, long dateTime) {
+		mDbHelper.open();
+    	Cursor cursor = mDbHelper.fetchStarting(dateTime);
+        export(fileName, cursor);
+        email(fileName);
+        mDbHelper.close();
+	}
+
+	/**
+	 * Send an email with the .QIF file as an attachment.
+	 * @param fileName
+	 */
+	private void email(String fileName) {
+		SharedPreferences settings = getSharedPreferences(Settings.SETTINGS_NAME, 0);
+		String[] address = {settings.getString(Settings.EMAIL_ADDRESS, "")};
+		Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+		emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, address);
+		emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, fileName);
+		emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "See attached file.");
+		emailIntent.setType("text/plain");
+		emailIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse("file:///sdcard/"+fileName));
+		startActivity(emailIntent);
 	}
 
 	/**
