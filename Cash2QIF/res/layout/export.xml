@@ -17,16 +17,30 @@
 	<TextView android:layout_width="wrap_content"
 		android:layout_height="wrap_content" 
 		android:text="@string/export_Date" />
-	<Button android:id="@+id/datepickerbutton"
-	    android:layout_width="fill_parent" 
-	    android:layout_height="wrap_content" 
-	    android:text="@string/all"/>
+    <RadioGroup
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+      <RadioButton android:id="@+id/since_last_export"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:checked="true"
+          android:text="@string/last_export"/>
+      <RadioButton android:id="@+id/earliest"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/earliest" />
+      <RadioButton android:id="@+id/select_date"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/select_date" />
+    </RadioGroup>
+	<CheckBox android:id="@+id/email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/send_email" />
 	<Button android:id="@+id/confirm" 
 	 	android:text="@string/confirm"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content" />
-	<Button android:id="@+id/email" 
-	 	android:text="@string/send_email"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content" />
 </LinearLayout>

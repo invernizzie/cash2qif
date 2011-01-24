@@ -26,6 +26,7 @@ public class DbAdapter {
     public static final String KEY_AMOUNT = "amount";
     public static final String KEY_CATEGORY = "category";
     public static final String KEY_MEMO = "memo";
+    public static final String KEY_TAG = "tag";
     public static final String KEY_ROWID = "_id";
 
     private DatabaseHelper mDbHelper;
@@ -34,16 +35,18 @@ public class DbAdapter {
     private static final String DATABASE_CREATE =
             "create table entry (_id integer primary key autoincrement, " +
             "date integer not null, payee text not null, amount double not null," +
-            "category, memo);";
+            "category, memo, tag);";
+    private static final String ALTER_2 = "alter table entry add tag";
 
     private static final String DATABASE_NAME = "data";
     private static final String DATABASE_TABLE = "entry";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private final Context mCtx;
 
     private static class DatabaseHelper extends SQLiteOpenHelper {
-        DatabaseHelper(Context context) {
+
+		DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
 
@@ -54,6 +57,9 @@ public class DbAdapter {
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        	if (oldVersion == 2) {
+        		db.execSQL(ALTER_2);
+        	}
         }
     }
 
@@ -116,7 +122,7 @@ public class DbAdapter {
      */
     public Cursor fetchAll() {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
-                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, null, null, null, null, KEY_DATE + " desc");
+                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO, KEY_TAG}, null, null, null, null, KEY_DATE + " desc");
     }
 
     /**
@@ -126,7 +132,7 @@ public class DbAdapter {
      */
     public Cursor fetchStarting(Long dateTime) {
         return mDb.query(DATABASE_TABLE, new String[] {KEY_ROWID, KEY_DATE,
-                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, KEY_DATE + " >= ?", 
+                KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO, KEY_TAG}, KEY_DATE + " >= ?", 
                 new String[] {dateTime.toString()}, null, null, KEY_DATE + " desc");
     }
 
@@ -138,7 +144,7 @@ public class DbAdapter {
      */
     public Cursor fetch(long rowId) throws SQLException {
         Cursor mCursor = mDb.query(true, DATABASE_TABLE, new String[] {KEY_ROWID,
-        		KEY_DATE, KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
+        		KEY_DATE, KEY_PAYEE, KEY_AMOUNT, KEY_CATEGORY, KEY_MEMO, KEY_TAG}, KEY_ROWID + "=" + rowId, null, null, null, null, null);
         if (mCursor != null)
             mCursor.moveToFirst();
         return mCursor;

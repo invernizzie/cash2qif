@@ -20,16 +20,19 @@
     <string name="menu_export">Export</string>
     <string name="menu_import">Import</string>
     <string name="file">File Name</string>
-    <string name="export_Date">Export beginning</string>
+    <string name="export_Date">Export from</string>
     <string name="importing_title">Importing title</string>
     <string name="importing">Importing</string>
     <string name="import_file">Import</string>
     <string name="success">Success</string>
     <string name="error">Error</string>
-    <string name="all">All</string>
+    <string name="earliest">Earliest</string>
+    <string name="last_export">Last export</string>
+    <string name="select_date">Select date</string>
     <string name="repeat">Repeat</string>
     <string name="repeat_every">Days between repeat</string>
     <string name="repeat_for">Number of repeats</string>
-    <string name="send_email">Confirm and email</string>
+    <string name="send_email">Send email</string>
     <string name="default_email">\@gmail.com</string>
+    <string name="tag">Tag</string>
 </resources>

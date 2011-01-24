@@ -13,6 +13,7 @@
  */
 package com.cash2qif.www;
 
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -26,12 +27,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class Main extends ListActivity {
+	static final int ID_ADDENTRY = 0;
 	public static final int ACTIVITY_CREATE = 0;
     public static final int ACTIVITY_EDIT = 1;
     public static final int ACTIVITY_DELETE_ALL = 2;
@@ -51,11 +54,13 @@ public class Main extends ListActivity {
     public static final char QIF_CATEGORY = 'L';
     public static final char QIF_MEMO = 'M';
     public static final char QIF_DIVIDER = '^';
+	public static final String TAG_DIVIDER = "/";
 	private int COL_DATE;
 	private int COL_PAYEE;
 	private int COL_AMOUNT;
 	private int COL_CATEGORY;
 	private int COL_MEMO;
+	private int COL_TAG;
 	private DecimalFormat amountFormatter = new DecimalFormat("#,##0.00");
     private DbAdapter mDbHelper = new DbAdapter(this);
 
@@ -64,9 +69,23 @@ public class Main extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.list);
         registerForContextMenu(getListView());
+		Button addEntryButton = (Button)findViewById(R.id.addEntryButton);
+		addEntryButton.setOnClickListener(addEntryButtonOnClickListener);
     }
 
     /**
+     * OnClickListener for the addEntryButton.
+     */
+    private Button.OnClickListener addEntryButtonOnClickListener
+	= new Button.OnClickListener() {
+		@Override
+		public void onClick(View v) {
+			create();
+            setResult(RESULT_OK);
+		}
+	};
+
+	/**
      * Fill data for the list page.
      */
 	private void fillData() {
@@ -78,8 +97,10 @@ public class Main extends ListActivity {
         COL_AMOUNT = cursor.getColumnIndex(DbAdapter.KEY_AMOUNT);
         COL_CATEGORY = cursor.getColumnIndex(DbAdapter.KEY_CATEGORY);
         COL_MEMO = cursor.getColumnIndex(DbAdapter.KEY_MEMO);
-        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT, DbAdapter.KEY_CATEGORY, DbAdapter.KEY_MEMO};
-        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount, R.id.category, R.id.memo};
+        COL_TAG = cursor.getColumnIndex(DbAdapter.KEY_TAG);
+        String[] from = new String[] {DbAdapter.KEY_DATE, DbAdapter.KEY_PAYEE, DbAdapter.KEY_AMOUNT, 
+        		DbAdapter.KEY_CATEGORY, DbAdapter.KEY_MEMO, DbAdapter.KEY_TAG};
+        int[] to = new int[] {R.id.date, R.id.payee, R.id.amount, R.id.category, R.id.memo, R.id.tag};
         SimpleCursorAdapter list = 
         	    new SimpleCursorAdapter(this, R.layout.row, cursor, from, to);
         list.setViewBinder(mViewBinder);
@@ -211,7 +232,8 @@ public class Main extends ListActivity {
 				Long dateTime = cursor.getLong(columnIndex);
 				Date date = new Date();
 				date.setTime(dateTime);
-				text = Utils.dateFormatter.format(date);
+				DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+				text = dateFormat.format(date);
 				textview.setText(text);
 			}
 			if (columnIndex == COL_PAYEE) {
@@ -230,6 +252,10 @@ public class Main extends ListActivity {
 			if (columnIndex == COL_MEMO) {
 				String memo = cursor.getString(columnIndex);
 				textview.setText(memo);
+			}
+			if (columnIndex == COL_TAG) {
+				String tag = cursor.getString(columnIndex);
+				textview.setText(tag);
 			}
 			return true;
 		}

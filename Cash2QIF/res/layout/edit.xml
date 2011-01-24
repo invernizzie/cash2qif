@@ -44,6 +44,14 @@
 				android:layout_height="wrap_content"/>
 			<TextView android:layout_width="wrap_content"
 				android:layout_height="wrap_content" 
+				android:text="@string/tag" />
+			<AutoCompleteTextView android:id="@+id/autocomplete_tag" 
+			    android:completionThreshold="1"
+			    android:capitalize="words"
+				android:layout_width="fill_parent"
+				android:layout_height="wrap_content"/>
+			<TextView android:layout_width="wrap_content"
+				android:layout_height="wrap_content" 
 				android:text="@string/memo" />
 			<AutoCompleteTextView android:id="@+id/autocomplete_memo" 
 			    android:completionThreshold="1"

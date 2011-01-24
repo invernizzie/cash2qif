@@ -44,6 +44,7 @@ public class Repeat extends Activity {
         	values.put(DbAdapter.KEY_AMOUNT, extras.getString(DbAdapter.KEY_AMOUNT));
         	values.put(DbAdapter.KEY_CATEGORY, extras.getString(DbAdapter.KEY_CATEGORY));
         	values.put(DbAdapter.KEY_MEMO, extras.getString(DbAdapter.KEY_MEMO));
+        	values.put(DbAdapter.KEY_TAG, extras.getString(DbAdapter.KEY_TAG));
         }
         
         int interval = parseNum(mRepeatEvery.getText().toString());

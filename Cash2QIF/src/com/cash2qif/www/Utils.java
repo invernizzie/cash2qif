@@ -12,6 +12,7 @@ public class Utils {
 	private static final String MINUS = "-";
 	public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("MM-dd-yyyy");
 	public static final SimpleDateFormat quickenFormatter = new SimpleDateFormat("MM/dd''yy");
+	public static final String DIRECTORY = "/Android/data/com.cash2qif.www/files/";
 
 	/**
 	 * Quicken imports positive amounts as debits and negative amounts
@@ -74,7 +75,7 @@ public class Utils {
 	public static String formatDateTime(Long dateTime) {
 		Date date = new Date();
 		date.setTime(dateTime);
-		return dateFormatter.format(date);
+		return quickenFormatter.format(date);
 	}
 
     /**
