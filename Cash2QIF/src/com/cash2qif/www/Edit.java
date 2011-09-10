@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -40,6 +41,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 
 public class Edit extends Activity {
+	private static final String TEMP = "Temp";
 	static final int ID_DATEPICKER = 0;
 	private long mTime;
 	private Button mDatePickerText;
@@ -83,6 +85,7 @@ public class Edit extends Activity {
         populate();
         confirmButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
+            	saveToDb();
                 setResult(RESULT_OK);
                 finish();
             }
@@ -98,6 +101,37 @@ public class Edit extends Activity {
     }
 
     /**
+     * Save to the database.
+     */
+    private void saveToDb() {
+        ContentValues values = new ContentValues();
+        values.put(DbAdapter.KEY_DATE, mTime);
+        if (mPayeeText != null && mPayeeText.getText() != null)
+        	values.put(DbAdapter.KEY_PAYEE, mPayeeText.getText().toString());
+        if (mAmountText != null && mAmountText.getText() != null)
+        	values.put(DbAdapter.KEY_AMOUNT, mAmountText.getText().toString());
+        if (mCategoryText != null && mCategoryText.getText() != null)
+        	values.put(DbAdapter.KEY_CATEGORY, mCategoryText.getText().toString());
+        if (mMemoText != null && mMemoText.getText() != null)
+        	values.put(DbAdapter.KEY_MEMO, mMemoText.getText().toString());
+        if (mTagText != null && mTagText.getText() != null)
+        	values.put(DbAdapter.KEY_TAG, mTagText.getText().toString());
+
+    	if (Utils.validate(values)) {
+    		mDbHelper.open();
+    		if (mRowId == null) {
+    			long id = mDbHelper.create(values);
+    			if (id > 0) {
+    				mRowId = id;
+    			}
+    		} else {
+    			mDbHelper.update(mRowId, values);
+    		}
+    		mDbHelper.close();
+    	}
+	}
+
+	/**
      * Repeat an entry
      */
     private void repeat() {
@@ -160,30 +194,45 @@ public class Edit extends Activity {
 	}
 
     /**
-     * Populate an entry with values from the database if it exists.
+     * Populate an entry with stored values if they exist.
      */
     private void populate() {
-        if (mRowId != null) {
-            mDbHelper.open();
-            Cursor cursor = mDbHelper.fetch(mRowId);
-            startManagingCursor(cursor);
-    		Date date = new Date();
-    		mTime = cursor.getLong(
-    			cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE));
-			DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
-			String text = dateFormat.format(date);
-            mDatePickerText.setText(text);
-            mPayeeText.setText(cursor.getString(
-                    cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
-            mAmountText.setText(cursor.getString(
-                    cursor.getColumnIndexOrThrow(DbAdapter.KEY_AMOUNT)));
-            mCategoryText.setText(cursor.getString(
-                    cursor.getColumnIndexOrThrow(DbAdapter.KEY_CATEGORY)));
-            mMemoText.setText(cursor.getString(
-                    cursor.getColumnIndexOrThrow(DbAdapter.KEY_MEMO)));
-            mTagText.setText(cursor.getString(
-                    cursor.getColumnIndexOrThrow(DbAdapter.KEY_TAG)));
-            mDbHelper.close();
+    	SharedPreferences settings = getSharedPreferences(TEMP, 0);
+    	Long tempId = settings.getLong(DbAdapter.KEY_ROWID, -1);
+    	if (tempId != null && tempId.equals(mRowId)) {
+    		// load from properties
+        	mTime = settings.getLong(DbAdapter.KEY_DATE, -1);
+        	Date date = new Date();
+        	DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+        	String text = dateFormat.format(date);
+        	mDatePickerText.setText(text);
+        	mPayeeText.setText(settings.getString(DbAdapter.KEY_PAYEE, ""));
+        	mAmountText.setText(settings.getString(DbAdapter.KEY_AMOUNT, ""));
+        	mCategoryText.setText(settings.getString(DbAdapter.KEY_CATEGORY, ""));
+        	mMemoText.setText(settings.getString(DbAdapter.KEY_MEMO, ""));
+        	mTagText.setText(settings.getString(DbAdapter.KEY_TAG, ""));
+    	} else if (mRowId != null) {
+        	// load existing from db
+        	mDbHelper.open();
+        	Cursor cursor = mDbHelper.fetch(mRowId);
+        	startManagingCursor(cursor);
+        	Date date = new Date();
+        	mTime = cursor.getLong(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_DATE));
+        	DateFormat dateFormat = android.text.format.DateFormat.getDateFormat(getApplicationContext());
+        	String text = dateFormat.format(date);
+        	mDatePickerText.setText(text);
+        	mPayeeText.setText(cursor.getString(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_PAYEE)));
+        	mAmountText.setText(cursor.getString(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_AMOUNT)));
+        	mCategoryText.setText(cursor.getString(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_CATEGORY)));
+        	mMemoText.setText(cursor.getString(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_MEMO)));
+        	mTagText.setText(cursor.getString(
+        			cursor.getColumnIndexOrThrow(DbAdapter.KEY_TAG)));
+        	mDbHelper.close();
         } else { // new entry
 			setToday();
 			updateDate();
@@ -274,31 +323,22 @@ public class Edit extends Activity {
      * Save values for the current entry.
      */
     private void saveState() {
-        ContentValues values = new ContentValues();
-        values.put(DbAdapter.KEY_DATE, mTime);
-        if (mPayeeText != null && mPayeeText.getText() != null)
-        	values.put(DbAdapter.KEY_PAYEE, mPayeeText.getText().toString());
-        if (mAmountText != null && mAmountText.getText() != null)
-        	values.put(DbAdapter.KEY_AMOUNT, mAmountText.getText().toString());
-        if (mCategoryText != null && mCategoryText.getText() != null)
-        	values.put(DbAdapter.KEY_CATEGORY, mCategoryText.getText().toString());
-        if (mMemoText != null && mMemoText.getText() != null)
-        	values.put(DbAdapter.KEY_MEMO, mMemoText.getText().toString());
-        if (mTagText != null && mTagText.getText() != null)
-        	values.put(DbAdapter.KEY_TAG, mTagText.getText().toString());
-
-    	if (Utils.validate(values)) {
-    		mDbHelper.open();
-    		if (mRowId == null) {
-    			long id = mDbHelper.create(values);
-    			if (id > 0) {
-    				mRowId = id;
-    			}
-    		} else {
-    			mDbHelper.update(mRowId, values);
-    		}
-    		mDbHelper.close();
-    	}
+    	SharedPreferences settings = getSharedPreferences(TEMP, 0);
+    	Editor editor = settings.edit();
+    	if (mRowId != null)
+    		editor.putLong(DbAdapter.KEY_ROWID, mRowId);
+    	editor.putLong(DbAdapter.KEY_DATE, mTime);
+    	editor.putString(DbAdapter.KEY_PAYEE, mPayeeText != null && 
+    			mPayeeText.getText() != null ? mPayeeText.getText().toString() : null);
+    	editor.putString(DbAdapter.KEY_AMOUNT, mAmountText != null && 
+    			mAmountText.getText() != null ? mAmountText.getText().toString() : null);
+    	editor.putString(DbAdapter.KEY_CATEGORY, mCategoryText != null && 
+    			mCategoryText.getText() != null ? mCategoryText.getText().toString() : null);
+    	editor.putString(DbAdapter.KEY_MEMO, mMemoText != null && 
+    			mMemoText.getText() != null ? mMemoText.getText().toString() : null);
+    	editor.putString(DbAdapter.KEY_TAG, mTagText != null && 
+    			mTagText.getText() != null ? mTagText.getText().toString() : null);
+    	editor.commit();
     }
     
 	/**
