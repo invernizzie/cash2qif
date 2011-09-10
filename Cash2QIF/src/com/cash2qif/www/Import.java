@@ -115,7 +115,9 @@ public class Import extends Activity {
     		try {
     			File root = Environment.getExternalStorageDirectory();
     			if (root.canRead()){
-    				File file = new File(root + Utils.DIRECTORY, fileName);
+    				File dir = new File(root + Utils.DIRECTORY);
+    				dir.mkdirs();
+    				File file = new File(root + Utils.DIRECTORY, fileName != null ? fileName : "");
     				FileReader reader = new FileReader(file);
     				BufferedReader in = new BufferedReader(reader);
     				String line = in.readLine(); // discard header
