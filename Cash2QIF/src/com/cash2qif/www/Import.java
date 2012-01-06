@@ -2,9 +2,10 @@ package com.cash2qif.www;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 
 import android.app.Activity;
@@ -118,7 +119,8 @@ public class Import extends Activity {
     				File dir = new File(root + Utils.DIRECTORY);
     				dir.mkdirs();
     				File file = new File(root + Utils.DIRECTORY, fileName != null ? fileName : "");
-    				FileReader reader = new FileReader(file);
+    				FileInputStream fis = new FileInputStream(file);
+    				InputStreamReader reader = new InputStreamReader(fis,"ISO-8859-1");
     				BufferedReader in = new BufferedReader(reader);
     				String line = in.readLine(); // discard header
     				Character c;

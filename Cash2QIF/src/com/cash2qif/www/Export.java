@@ -230,7 +230,7 @@ public class Export extends Activity {
 				if (dir.exists() && file.exists())
 					System.out.println("file exists");
 				BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-	            out.write(result.getBytes());
+	            out.write(result.getBytes("ISO-8859-1"));
 	            out.flush();
 	            out.close();
 	    		SharedPreferences.Editor editor = getSharedPreferences(Settings.SETTINGS_NAME, 0).edit();
