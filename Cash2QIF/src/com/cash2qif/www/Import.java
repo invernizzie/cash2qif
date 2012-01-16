@@ -127,7 +127,7 @@ public class Import extends Activity {
     				ContentValues values = emptyValues();
     				while (line != null) {
     					line = in.readLine();
-    					if (line != null) {
+    					if (line != null && line.length() > 0) {
     						c = line.charAt(0);
     						switch(c) {
     						case Main.QIF_DATE:
