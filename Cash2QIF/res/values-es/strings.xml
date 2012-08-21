@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cash2QIF</string>
+    <string name="address">Email address</string>
+    <string name="email_summary">Email address to send .QIF file</string>
+    <string name="empty">No entries.  Press Menu.</string>
+    <string name="menu_insert">Add entry</string>
+    <string name="edit">Edit</string>
+    <string name="menu_delete">Delete entry</string>
+    <string name="menu_delete_all">Delete all</string>
+    <string name="menu_settings">Settings</string>
+    <string name="date">Date</string>
+    <string name="payee">Payee</string>
+    <string name="amount">Amount</string>
+    <string name="category">Category</string>
+    <string name="memo">Memo</string>
+    <string name="confirm">Confirm</string>
+    <string name="exportText"></string>
+	<string name="today">Today</string>
+    <string name="menu_export">Export</string>
+    <string name="menu_import">Import</string>
+    <string name="file">File Name</string>
+    <string name="export_Date">Export from</string>
+    <string name="importing_title">Importing title</string>
+    <string name="importing">Importing</string>
+    <string name="import_file">Import</string>
+    <string name="success">Success</string>
+    <string name="error">Error</string>
+    <string name="earliest">Earliest</string>
+    <string name="last_export">Last export</string>
+    <string name="select_date">Select date</string>
+    <string name="repeat">Repeat</string>
+    <string name="repeat_every">Days between repeat</string>
+    <string name="repeat_for">Number of repeats</string>
+    <string name="send_email">Send email</string>
+    <string name="default_email">\@gmail.com</string>
+    <string name="tag">Tag</string>
+</resources>
