@@ -6,10 +6,10 @@
     android:layout_height="fill_parent">
 	<CheckBoxPreference android:key="default_categories"
 		android:defaultValue="true"
-		android:title="Show default categories"/>
+		android:title="@string/show_default_categories"/>
 	<EditTextPreference
 		android:key="email_address"
 		android:defaultValue="@string/default_email"
-		android:title="Email Address"
+		android:title="@string/address"
 		android:summary="@string/email_summary"/>
 </PreferenceScreen>

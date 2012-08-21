@@ -33,6 +33,7 @@
     <string name="repeat_every">Days between repeat</string>
     <string name="repeat_for">Number of repeats</string>
     <string name="send_email">Send email</string>
+    <string name="show_default_categories">Show default categories</string>
     <string name="default_email">\@gmail.com</string>
     <string name="tag">Tag</string>
 </resources>
